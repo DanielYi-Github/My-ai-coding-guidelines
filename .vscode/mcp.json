@@ -1,0 +1,15 @@
+{
+  "servers": {
+    "anysearch": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-remote",
+        "https://api.anysearch.com/mcp",
+        "--header",
+        "Authorization: Bearer ${ANYSEARCH_API_KEY}"
+      ]
+    }
+  }
+}

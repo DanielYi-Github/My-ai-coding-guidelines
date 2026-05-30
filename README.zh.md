@@ -67,6 +67,55 @@ setup.bat
 
 ---
 
+## AnySearch：自動網路搜尋
+
+本專案預設整合了 **[AnySearch](https://www.anysearch.com/docs)** 作為所有 AI 工具的搜尋引擎。當 AI 需要查詢網路資訊時，會自動使用 AnySearch，而非直接呼叫 WebFetch——拿到的是預先融合、品質評分的精煉摘要，節省 60–80% Token。
+
+**不需要任何提示詞**。行為規則已寫入 `CLAUDE.md`，MCP 設定已預先配置在專案檔案中。
+
+### 已預設配置的檔案
+
+| 檔案 | 工具 | 方式 |
+|---|---|---|
+| `.claude/settings.json` | Claude Code | Streamable HTTP（原生支援）|
+| `.cursor/mcp.json` | Cursor | stdio 透過 `mcp-remote` |
+| `.vscode/mcp.json` | VS Code Copilot | stdio 透過 `mcp-remote` |
+| `~/.codeium/windsurf/mcp_config.json` | Windsurf | SSE（由 `setup.sh` 寫入）|
+| `~/.claude/skills/anysearch` | Claude Code | SKILL 套件 |
+| `.skills/anysearch` | Cursor / Windsurf | SKILL 套件 |
+
+### API Key 設定（可選，建議設定）
+
+無 Key 時自動使用匿名存取（IP 限流），足夠日常開發。要提高限額：
+
+```bash
+# 加入 ~/.zshrc 或 ~/.bashrc
+export ANYSEARCH_API_KEY=your_key_here
+```
+
+在 [anysearch.com](https://www.anysearch.com) 申請 Key。
+
+### 手動 MCP 設定（未使用 setup.sh 時）
+
+**Windsurf** — 需要先啟動 SSE Proxy：
+```bash
+npx -y supergateway \
+  --streamableHttp https://api.anysearch.com/mcp \
+  --outputTransport sse --port 8000 \
+  --oauth2Bearer $ANYSEARCH_API_KEY
+
+# ~/.codeium/windsurf/mcp_config.json
+{
+  "mcpServers": {
+    "anysearch": { "serverUrl": "http://localhost:8000/sse" }
+  }
+}
+```
+
+**Codex / Factory Droid / Gemini CLI / OpenCode** — 請參照 [anysearch.com/docs](https://www.anysearch.com/docs) 的各平台 MCP 安裝說明，完成後 `CLAUDE.md` 的行為規則會自動觸發。
+
+---
+
 ## 系統開發流程
 
 本專案定義了一套 **9-Phase 開發生命週期**，建立在三層架構之上：
@@ -224,18 +273,26 @@ ai-coding-guidelines/
 ├── AGENTS.md                              → 符號連結 CLAUDE.md（Codex）
 ├── .windsurfrules                         → 符號連結 CLAUDE.md（Windsurf）
 ├── .clinerules                            → 符號連結 CLAUDE.md（Cline/Roo）
-├── .github/
-│   └── copilot-instructions.md           → 符號連結 ../CLAUDE.md（Copilot）
+├── .claude/
+│   ├── settings.json                     ← AnySearch MCP（Claude Code，已 commit）
+│   └── settings.local.json              ← 本地權限設定（不 commit）
 ├── .cursor/
+│   ├── mcp.json                          ← AnySearch MCP（Cursor）
 │   └── rules/
-│       └── ai-guidelines.mdc             → 符號連結 ../../CLAUDE.md（Cursor）
+│       └── ai-guidelines.mdc            → 符號連結 ../../CLAUDE.md
+├── .vscode/
+│   └── mcp.json                          ← AnySearch MCP（VS Code Copilot）
+├── .skills/
+│   └── anysearch/                        ← AnySearch SKILL（由 setup.sh 安裝）
+├── .github/
+│   └── copilot-instructions.md          → 符號連結 ../CLAUDE.md
 ├── .agents/
 │   └── rules/
-│       └── antigravity-rtk-rules.md      → 符號連結 ../../CLAUDE.md（Antigravity）
+│       └── antigravity-rtk-rules.md     → 符號連結 ../../CLAUDE.md
 ├── .kilocode/
 │   └── rules/
-│       └── ai-guidelines.md              → 符號連結 ../../CLAUDE.md（Kilo Code）
-├── setup.sh                              ← macOS / Linux 安裝腳本
+│       └── ai-guidelines.md             → 符號連結 ../../CLAUDE.md
+├── setup.sh                              ← macOS / Linux 安裝腳本（含 AnySearch）
 ├── setup.bat                             ← Windows 安裝腳本
 ├── README.md                             ← 英文說明
 └── README.zh.md                          ← 本檔案（繁體中文）
@@ -268,6 +325,7 @@ ai-coding-guidelines/
 - [garrytan/gstack](https://github.com/garrytan/gstack) — 23 個 AI 開發 slash command（MIT 授權）
 - [obra/superpowers](https://github.com/obra/superpowers) — AI coding agent 的軟體開發方法論
 - [anthropics/skills](https://github.com/anthropics/skills) — Agent Skills 規格標準與範例庫
+- [AnySearch](https://www.anysearch.com) — AI 搜尋基礎設施，統一多源搜尋 API
 
 ---
 

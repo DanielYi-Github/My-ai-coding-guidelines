@@ -67,6 +67,55 @@ setup.bat
 
 ---
 
+## AnySearch: Automatic Web Search
+
+This project pre-configures **[AnySearch](https://www.anysearch.com/docs)** as the default search engine for all AI tools. Whenever the AI needs to look something up online, it automatically uses AnySearch instead of raw WebFetch — getting pre-ranked, multi-source results with 60–80% fewer tokens.
+
+**No prompting required.** The behavior is enforced in `CLAUDE.md` and the MCP servers are pre-configured in the project files.
+
+### What's Pre-Configured
+
+| File | Tool | Method |
+|---|---|---|
+| `.claude/settings.json` | Claude Code | Streamable HTTP (native) |
+| `.cursor/mcp.json` | Cursor | stdio via `mcp-remote` |
+| `.vscode/mcp.json` | VS Code Copilot | stdio via `mcp-remote` |
+| `~/.codeium/windsurf/mcp_config.json` | Windsurf | SSE (written by `setup.sh`) |
+| `~/.claude/skills/anysearch` | Claude Code | SKILL package |
+| `.skills/anysearch` | Cursor / Windsurf | SKILL package |
+
+### API Key Setup (Optional but Recommended)
+
+Anonymous access works out of the box (IP rate-limited). For higher limits:
+
+```bash
+# Add to ~/.zshrc or ~/.bashrc
+export ANYSEARCH_API_KEY=your_key_here
+```
+
+Get a key at [anysearch.com](https://www.anysearch.com).
+
+### Manual MCP Setup (if not using setup.sh)
+
+**Windsurf** — requires SSE proxy (run once before starting Windsurf):
+```bash
+npx -y supergateway \
+  --streamableHttp https://api.anysearch.com/mcp \
+  --outputTransport sse --port 8000 \
+  --oauth2Bearer $ANYSEARCH_API_KEY
+
+# ~/.codeium/windsurf/mcp_config.json
+{
+  "mcpServers": {
+    "anysearch": { "serverUrl": "http://localhost:8000/sse" }
+  }
+}
+```
+
+**Codex / Factory Droid / Gemini CLI / OpenCode** — follow [anysearch.com/docs](https://www.anysearch.com/docs) for platform-specific MCP setup, then the `CLAUDE.md` behavior rules will auto-trigger it.
+
+---
+
 ## Development Workflow Stack
 
 This project defines a **9-phase development lifecycle** built on three layers:
@@ -212,33 +261,6 @@ Even without RTK installed, the rules instruct the AI to compress its own output
 
 ---
 
-## Project Structure
-
-```
-ai-coding-guidelines/
-├── CLAUDE.md                              ← Single source of truth (edit only this)
-├── AGENTS.md                              → symlink to CLAUDE.md  (Codex)
-├── .windsurfrules                         → symlink to CLAUDE.md  (Windsurf)
-├── .clinerules                            → symlink to CLAUDE.md  (Cline/Roo)
-├── .github/
-│   └── copilot-instructions.md           → symlink to ../CLAUDE.md  (Copilot)
-├── .cursor/
-│   └── rules/
-│       └── ai-guidelines.mdc             → symlink to ../../CLAUDE.md  (Cursor)
-├── .agents/
-│   └── rules/
-│       └── antigravity-rtk-rules.md      → symlink to ../../CLAUDE.md  (Antigravity)
-├── .kilocode/
-│   └── rules/
-│       └── ai-guidelines.md              → symlink to ../../CLAUDE.md  (Kilo Code)
-├── setup.sh                              ← macOS / Linux setup script
-├── setup.bat                             ← Windows setup script
-├── README.md                             ← This file (English)
-└── README.zh.md                          ← 繁體中文說明
-```
-
----
-
 ## How to Update the Rules
 
 Edit **only** `CLAUDE.md`. Since everything else is a symlink, all tools pick up the change immediately — no sync needed.
@@ -256,6 +278,41 @@ These guidelines are working if you see:
 
 ---
 
+## Project Structure
+
+```
+ai-coding-guidelines/
+├── CLAUDE.md                              ← Single source of truth (edit only this)
+├── AGENTS.md                              → symlink to CLAUDE.md  (Codex)
+├── .windsurfrules                         → symlink to CLAUDE.md  (Windsurf)
+├── .clinerules                            → symlink to CLAUDE.md  (Cline/Roo)
+├── .claude/
+│   ├── settings.json                     ← AnySearch MCP (Claude Code, committed)
+│   └── settings.local.json              ← Local permissions (gitignored)
+├── .cursor/
+│   ├── mcp.json                          ← AnySearch MCP (Cursor)
+│   └── rules/
+│       └── ai-guidelines.mdc            → symlink to ../../CLAUDE.md
+├── .vscode/
+│   └── mcp.json                          ← AnySearch MCP (VS Code Copilot)
+├── .skills/
+│   └── anysearch/                        ← AnySearch SKILL (Cursor/Windsurf, created by setup.sh)
+├── .github/
+│   └── copilot-instructions.md          → symlink to ../CLAUDE.md
+├── .agents/
+│   └── rules/
+│       └── antigravity-rtk-rules.md     → symlink to ../../CLAUDE.md
+├── .kilocode/
+│   └── rules/
+│       └── ai-guidelines.md             → symlink to ../../CLAUDE.md
+├── setup.sh                              ← macOS / Linux setup (symlinks + AnySearch skill)
+├── setup.bat                             ← Windows setup
+├── README.md                             ← This file (English)
+└── README.zh.md                          ← 繁體中文說明
+```
+
+---
+
 ## Credits
 
 - [Andrej Karpathy](https://x.com/karpathy) — original observations on LLM coding pitfalls
@@ -264,6 +321,7 @@ These guidelines are working if you see:
 - [garrytan/gstack](https://github.com/garrytan/gstack) — 23 AI development slash commands (MIT)
 - [obra/superpowers](https://github.com/obra/superpowers) — Software development methodology for coding agents
 - [anthropics/skills](https://github.com/anthropics/skills) — Agent Skills standard and examples
+- [AnySearch](https://www.anysearch.com) — AI search infrastructure, unified multi-source search API
 
 ---
 
