@@ -260,4 +260,55 @@ rtk kubectl pods        # 取代 kubectl get pods
 
 ---
 
-*來源：[multica-ai/andrej-karpathy-skills](https://github.com/multica-ai/andrej-karpathy-skills) · [rtk-ai/rtk](https://github.com/rtk-ai/rtk) · MIT / Apache-2.0*
+## 八、系統開發流程（Unified Development Workflow）
+
+> 整合 [garrytan/gstack](https://github.com/garrytan/gstack)、[obra/superpowers](https://github.com/obra/superpowers)、[anthropics/skills](https://github.com/anthropics/skills) 三套工具為完整 9-Phase 開發生命週期。
+
+**三層架構分工**：
+- **superpowers**（方法論層）：決策框架，控制「如何思考與工作」
+- **gstack**（工具層）：執行武器，控制「這個階段用什麼指令」
+- **anthropics/skills**（基礎設施層）：技能格式標準與知識沉澱機制
+
+**關鍵原則**：在同一 Phase 中，**superpowers 先（決策）→ gstack 後（執行）**。兩者不是二選一，而是決策層與執行層的搭配。
+
+### 安裝三層工具（一次性）
+
+各 AI 工具詳細安裝方式請參見 README.md 的「Development Workflow Stack」章節。以下為 Claude Code 快速安裝：
+
+```bash
+# 1. superpowers（方法論層）
+/plugin install superpowers@claude-plugins-official
+
+# 2. gstack（工具層）
+git clone --single-branch --depth 1 https://github.com/garrytan/gstack.git ~/gstack
+cd ~/gstack && ./setup
+
+# 3. anthropics/skills（基礎設施層）
+/plugin marketplace add anthropics/skills
+```
+
+### 9-Phase 開發流程（依序執行，不可跳過）
+
+| Phase | 目標 | superpowers 指令 | gstack 指令 |
+|---|---|---|---|
+| **0. 工作空間** | 隔離環境，不污染主線 | `using-git-worktrees` | — |
+| **1. 產品策略** | 確認解決正確問題 | `brainstorming` | `/office-hours` → `/plan-ceo-review` |
+| **2. 技術架構** | 鎖定架構決策，拆解任務 | `writing-plans` | `/plan-eng-review` → `/plan-devex-review` |
+| **3. 設計** | 視覺與 UX 在寫 code 前定案 | — | `/plan-design-review` → `/design-consultation` → `/design-shotgun` → `/design-html` |
+| **4. 安全前置** | 建構前先知道所有安全雷 | — | `/cso`（OWASP + STRIDE）|
+| **5. 實作（TDD）** | RED → GREEN → REFACTOR 循環 | `test-driven-development` `subagent-driven-development` `dispatching-parallel-agents` `systematic-debugging` | `/investigate`（卡住時）|
+| **6. Code Review** | Spec 合規 + 程式碼品質雙層驗證 | `requesting-code-review` `receiving-code-review` | `/review` |
+| **7. QA & 效能** | 功能正確 + 效能基線 + 設計落地 | — | `/qa` → `/benchmark` → `/devex-review` → `/design-review` |
+| **8. Ship** | 乾淨合併、部署、上線監控 | `finishing-a-development-branch` | `/ship` → `/land-and-deploy` → `/canary` |
+| **9. 沉澱** | 把本次 pattern 變成下次的可重用資產 | `writing-skills` | `/document-release` → `/document-generate` → `/retro` |
+
+### 流程執行規則
+
+1. **不跳 phase**：每個 phase 有隱含的驗收標準，未達標不進入下一個
+2. **安全前置不可省**：Phase 4 `/cso` 必須在 Phase 5 實作開始**之前**完成
+3. **TDD 是強制的**：Phase 5 的每一行 code 都必須對應一個先存在的失敗測試
+4. **沉澱關閉迴圈**：Phase 9 `writing-skills` + `anthropics/skills` 格式將本次模式封裝為 `SKILL.md`，讓 AI 下個 project 直接使用
+
+---
+
+*來源：[multica-ai/andrej-karpathy-skills](https://github.com/multica-ai/andrej-karpathy-skills) · [rtk-ai/rtk](https://github.com/rtk-ai/rtk) · [garrytan/gstack](https://github.com/garrytan/gstack) · [obra/superpowers](https://github.com/obra/superpowers) · [anthropics/skills](https://github.com/anthropics/skills) · MIT / Apache-2.0*

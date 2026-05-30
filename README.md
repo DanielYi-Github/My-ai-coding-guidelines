@@ -8,10 +8,12 @@ English | [繁體中文](./README.zh.md)
 
 ## What Is This?
 
-This repository is a **single source of truth** for AI coding behavior guidelines. It combines two battle-tested open-source rule sets:
+This repository is a **single source of truth** for AI coding behavior guidelines. It combines four battle-tested open-source systems:
 
 - **[Karpathy Guidelines](https://github.com/multica-ai/andrej-karpathy-skills)** — Behavioral rules derived from Andrej Karpathy's observations on LLM coding pitfalls: think before coding, keep it simple, make surgical changes, and define verifiable goals.
 - **[RTK (Rust Token Killer)](https://github.com/rtk-ai/rtk)** — Token optimization rules that reduce LLM context consumption by 60–90% on common shell commands.
+- **[superpowers](https://github.com/obra/superpowers)** — A software development methodology layer: structured workflow, TDD discipline, and multi-agent coordination.
+- **[gstack](https://github.com/garrytan/gstack)** — 23 specialized slash commands covering every phase from product strategy to post-deploy monitoring.
 
 Everything lives in `CLAUDE.md`. All other tool-specific files are symlinks pointing back to it — so you only ever edit one file.
 
@@ -62,6 +64,122 @@ rtk init --agent antigravity   # Google Antigravity
 # Or run as normal user — it will copy files instead
 setup.bat
 ```
+
+---
+
+## Development Workflow Stack
+
+This project defines a **9-phase development lifecycle** built on three layers:
+
+| Layer | Tool | Role |
+|---|---|---|
+| Methodology | [superpowers](https://github.com/obra/superpowers) | How to think and work — decision frameworks, TDD discipline, multi-agent coordination |
+| Tooling | [gstack](https://github.com/garrytan/gstack) | What to use at each phase — 23 specialized slash commands |
+| Infrastructure | [anthropics/skills](https://github.com/anthropics/skills) | Skill format standard — package and distribute reusable workflows |
+
+**Key principle**: Within any phase where both tools appear, **superpowers runs first (decide) → gstack runs second (execute)**. They are complementary, not interchangeable.
+
+### Install the Workflow Stack
+
+#### Claude Code (full support)
+
+```bash
+# superpowers
+/plugin install superpowers@claude-plugins-official
+
+# gstack
+git clone --single-branch --depth 1 https://github.com/garrytan/gstack.git ~/gstack
+cd ~/gstack && ./setup
+
+# anthropics/skills
+/plugin marketplace add anthropics/skills
+```
+
+#### Codex CLI
+
+```bash
+# superpowers — open plugin interface
+/plugins  # search "superpowers" → Install
+
+# gstack
+git clone --single-branch --depth 1 https://github.com/garrytan/gstack.git ~/gstack
+cd ~/gstack && ./setup --host codex
+```
+
+#### Cursor
+
+```bash
+# superpowers
+/add-plugin superpowers
+# or search "superpowers" in plugin marketplace
+
+# gstack
+git clone --single-branch --depth 1 https://github.com/garrytan/gstack.git ~/gstack
+cd ~/gstack && ./setup --host cursor
+```
+
+#### Gemini CLI
+
+```bash
+# superpowers
+gemini extensions install https://github.com/obra/superpowers
+
+# gstack — uses universal setup (auto-detects)
+git clone --single-branch --depth 1 https://github.com/garrytan/gstack.git ~/gstack
+cd ~/gstack && ./setup
+```
+
+#### GitHub Copilot CLI
+
+```bash
+# superpowers
+copilot plugin marketplace add obra/superpowers-marketplace
+copilot plugin install superpowers@superpowers-marketplace
+
+# gstack — universal setup
+git clone --single-branch --depth 1 https://github.com/garrytan/gstack.git ~/gstack
+cd ~/gstack && ./setup
+```
+
+#### Factory Droid
+
+```bash
+# superpowers
+droid plugin marketplace add https://github.com/obra/superpowers
+droid plugin install superpowers@superpowers
+
+# gstack
+git clone --single-branch --depth 1 https://github.com/garrytan/gstack.git ~/gstack
+cd ~/gstack && ./setup --host factory
+```
+
+> **Windsurf / Cline / Roo Code**: superpowers does not have an official integration. Apply the 9-phase methodology manually using the workflow table below as a checklist.
+
+---
+
+### The 9-Phase Development Lifecycle
+
+Each phase must be completed before moving to the next. Do not skip phases.
+
+| Phase | Goal | superpowers | gstack |
+|---|---|---|---|
+| **0. Workspace** | Isolated branch, clean main | `using-git-worktrees` | — |
+| **1. Product Strategy** | Confirm you're solving the right problem | `brainstorming` | `/office-hours` → `/plan-ceo-review` |
+| **2. Architecture** | Lock decisions, break into tasks | `writing-plans` | `/plan-eng-review` → `/plan-devex-review` |
+| **3. Design** | Visual and UX decisions before any code | — | `/plan-design-review` → `/design-consultation` → `/design-shotgun` → `/design-html` |
+| **4. Security (upfront)** | Know the risks before building | — | `/cso` (OWASP + STRIDE) |
+| **5. Implementation (TDD)** | RED → GREEN → REFACTOR | `test-driven-development` `subagent-driven-development` `dispatching-parallel-agents` `systematic-debugging` | `/investigate` (when stuck) |
+| **6. Code Review** | Spec compliance + code quality, two-stage | `requesting-code-review` `receiving-code-review` | `/review` |
+| **7. QA & Performance** | Functional correctness + perf baseline + design verification | — | `/qa` → `/benchmark` → `/devex-review` → `/design-review` |
+| **8. Ship** | Clean merge, deploy, monitor | `finishing-a-development-branch` | `/ship` → `/land-and-deploy` → `/canary` |
+| **9. Knowledge Capture** | Turn this session's patterns into reusable assets | `writing-skills` | `/document-release` → `/document-generate` → `/retro` |
+
+#### Four Non-Negotiable Rules
+
+1. **Security is pre-build, not post-ship** — Phase 4 `/cso` must complete before Phase 5 begins
+2. **TDD is mandatory** — Every line of code in Phase 5 must correspond to a pre-existing failing test
+3. **superpowers before gstack** — In any shared phase, run the superpowers decision framework first, then execute with gstack
+4. **Always close the loop** — Phase 9 `writing-skills` + `anthropics/skills` SKILL.md format converts session knowledge into reusable skills
 
 ---
 
@@ -143,6 +261,9 @@ These guidelines are working if you see:
 - [Andrej Karpathy](https://x.com/karpathy) — original observations on LLM coding pitfalls
 - [multica-ai/andrej-karpathy-skills](https://github.com/multica-ai/andrej-karpathy-skills) — Karpathy guidelines implementation (MIT)
 - [rtk-ai/rtk](https://github.com/rtk-ai/rtk) — RTK token optimization (Apache 2.0)
+- [garrytan/gstack](https://github.com/garrytan/gstack) — 23 AI development slash commands (MIT)
+- [obra/superpowers](https://github.com/obra/superpowers) — Software development methodology for coding agents
+- [anthropics/skills](https://github.com/anthropics/skills) — Agent Skills standard and examples
 
 ---
 

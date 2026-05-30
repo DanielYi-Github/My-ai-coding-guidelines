@@ -8,10 +8,12 @@
 
 ## 這是什麼？
 
-這個 Repository 是一份 **AI 編碼行為的單一真相來源**，整合了兩套經過實戰驗證的開源規則：
+這個 Repository 是一份 **AI 編碼行為的單一真相來源**，整合了四套經過實戰驗證的開源系統：
 
 - **[Karpathy Guidelines](https://github.com/multica-ai/andrej-karpathy-skills)** — 行為準則，源自 Andrej Karpathy 對 LLM 編碼缺陷的觀察：寫程式前先思考、保持簡潔、精準修改、定義可驗證的目標。
 - **[RTK（Rust Token Killer）](https://github.com/rtk-ai/rtk)** — Token 優化規則，在常用 Shell 指令上將 LLM context 消耗降低 60–90%。
+- **[superpowers](https://github.com/obra/superpowers)** — 方法論層：結構化工作流程、TDD 紀律、多 agent 協作框架。
+- **[gstack](https://github.com/garrytan/gstack)** — 23 個專用 slash command，覆蓋從產品策略到部署監控的完整開發生命週期。
 
 所有規則都存放在 `CLAUDE.md` 這一個檔案中。其他工具專用的設定檔全都是指向它的符號連結，所以你只需要編輯一個地方。
 
@@ -62,6 +64,122 @@ rtk init --agent antigravity   # Google Antigravity
 # 一般使用者執行則會改為複製檔案
 setup.bat
 ```
+
+---
+
+## 系統開發流程
+
+本專案定義了一套 **9-Phase 開發生命週期**，建立在三層架構之上：
+
+| 層次 | 工具 | 職責 |
+|---|---|---|
+| 方法論層 | [superpowers](https://github.com/obra/superpowers) | 如何思考與工作——決策框架、TDD 紀律、多 agent 協作 |
+| 工具層 | [gstack](https://github.com/garrytan/gstack) | 每個階段用什麼——23 個專用 slash command |
+| 基礎設施層 | [anthropics/skills](https://github.com/anthropics/skills) | 技能格式標準——封裝並分發可重用工作流程 |
+
+**核心原則**：在任何兩者共存的 Phase 中，**superpowers 先執行（決策）→ gstack 後執行（行動）**。兩者互補，不可互換。
+
+### 安裝工作流程三層工具
+
+#### Claude Code（完整支援）
+
+```bash
+# superpowers
+/plugin install superpowers@claude-plugins-official
+
+# gstack
+git clone --single-branch --depth 1 https://github.com/garrytan/gstack.git ~/gstack
+cd ~/gstack && ./setup
+
+# anthropics/skills
+/plugin marketplace add anthropics/skills
+```
+
+#### Codex CLI
+
+```bash
+# superpowers — 開啟 plugin 介面
+/plugins  # 搜尋 "superpowers" → 安裝
+
+# gstack
+git clone --single-branch --depth 1 https://github.com/garrytan/gstack.git ~/gstack
+cd ~/gstack && ./setup --host codex
+```
+
+#### Cursor
+
+```bash
+# superpowers
+/add-plugin superpowers
+# 或在 plugin marketplace 搜尋 "superpowers"
+
+# gstack
+git clone --single-branch --depth 1 https://github.com/garrytan/gstack.git ~/gstack
+cd ~/gstack && ./setup --host cursor
+```
+
+#### Gemini CLI
+
+```bash
+# superpowers
+gemini extensions install https://github.com/obra/superpowers
+
+# gstack（自動偵測）
+git clone --single-branch --depth 1 https://github.com/garrytan/gstack.git ~/gstack
+cd ~/gstack && ./setup
+```
+
+#### GitHub Copilot CLI
+
+```bash
+# superpowers
+copilot plugin marketplace add obra/superpowers-marketplace
+copilot plugin install superpowers@superpowers-marketplace
+
+# gstack
+git clone --single-branch --depth 1 https://github.com/garrytan/gstack.git ~/gstack
+cd ~/gstack && ./setup
+```
+
+#### Factory Droid
+
+```bash
+# superpowers
+droid plugin marketplace add https://github.com/obra/superpowers
+droid plugin install superpowers@superpowers
+
+# gstack
+git clone --single-branch --depth 1 https://github.com/garrytan/gstack.git ~/gstack
+cd ~/gstack && ./setup --host factory
+```
+
+> **Windsurf / Cline / Roo Code**：superpowers 目前無官方整合。請將下方 9-Phase 流程表當作 checklist 手動執行。
+
+---
+
+### 9-Phase 開發生命週期
+
+每個 Phase 都有隱含的驗收標準，完成後才進入下一個。
+
+| Phase | 目標 | superpowers 指令 | gstack 指令 |
+|---|---|---|---|
+| **0. 工作空間** | 隔離分支，不污染主線 | `using-git-worktrees` | — |
+| **1. 產品策略** | 確認解決正確問題 | `brainstorming` | `/office-hours` → `/plan-ceo-review` |
+| **2. 技術架構** | 鎖定架構決策，拆解任務 | `writing-plans` | `/plan-eng-review` → `/plan-devex-review` |
+| **3. 設計** | 視覺與 UX 在寫 code 前定案 | — | `/plan-design-review` → `/design-consultation` → `/design-shotgun` → `/design-html` |
+| **4. 安全前置** | 建構前先知道所有風險 | — | `/cso`（OWASP + STRIDE）|
+| **5. 實作（TDD）** | RED → GREEN → REFACTOR 循環 | `test-driven-development` `subagent-driven-development` `dispatching-parallel-agents` `systematic-debugging` | `/investigate`（卡住時）|
+| **6. Code Review** | Spec 合規 + 程式碼品質，兩段式驗證 | `requesting-code-review` `receiving-code-review` | `/review` |
+| **7. QA & 效能** | 功能正確 + 效能基線 + 設計落地 | — | `/qa` → `/benchmark` → `/devex-review` → `/design-review` |
+| **8. Ship** | 乾淨合併、部署、上線監控 | `finishing-a-development-branch` | `/ship` → `/land-and-deploy` → `/canary` |
+| **9. 知識沉澱** | 把本次 pattern 變成下次的可重用資產 | `writing-skills` | `/document-release` → `/document-generate` → `/retro` |
+
+#### 四條不可妥協的規則
+
+1. **安全在建構前，不是上線後** — Phase 4 `/cso` 必須在 Phase 5 開始**之前**完成
+2. **TDD 是強制的** — Phase 5 的每一行 code 都必須對應一個先存在的失敗測試
+3. **superpowers 先於 gstack** — 在同一 Phase 中，先跑 superpowers 決策框架，再用 gstack 執行
+4. **永遠關閉迴圈** — Phase 9 `writing-skills` + `anthropics/skills` 的 `SKILL.md` 格式，將本次模式轉為可分發的技能
 
 ---
 
@@ -147,6 +265,9 @@ ai-coding-guidelines/
 - [Andrej Karpathy](https://x.com/karpathy) — LLM 編碼缺陷的原始觀察
 - [multica-ai/andrej-karpathy-skills](https://github.com/multica-ai/andrej-karpathy-skills) — Karpathy 指引實作（MIT 授權）
 - [rtk-ai/rtk](https://github.com/rtk-ai/rtk) — RTK Token 優化工具（Apache 2.0 授權）
+- [garrytan/gstack](https://github.com/garrytan/gstack) — 23 個 AI 開發 slash command（MIT 授權）
+- [obra/superpowers](https://github.com/obra/superpowers) — AI coding agent 的軟體開發方法論
+- [anthropics/skills](https://github.com/anthropics/skills) — Agent Skills 規格標準與範例庫
 
 ---
 
