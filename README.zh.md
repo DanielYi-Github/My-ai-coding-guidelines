@@ -47,7 +47,7 @@
 # 1. 下載 CLAUDE.md 到你的專案根目錄
 curl -o CLAUDE.md https://raw.githubusercontent.com/<your-username>/ai-coding-guidelines/main/CLAUDE.md
 
-# 2. 執行安裝腳本，建立所有符號連結
+# 2. 執行安裝腳本（同時處理符號連結與環境設定）
 curl -o setup.sh https://raw.githubusercontent.com/<your-username>/ai-coding-guidelines/main/setup.sh
 chmod +x setup.sh && ./setup.sh
 
@@ -60,8 +60,9 @@ rtk init --agent antigravity   # Google Antigravity
 ### Windows 使用者
 
 ```bat
-# 以「系統管理員」身份執行 setup.bat 可建立符號連結
-# 一般使用者執行則會改為複製檔案
+REM 以「系統管理員」身份執行 setup.bat 可建立符號連結
+REM 一般使用者執行則會改為複製檔案
+REM （指令碼會引導你完成 AnySearch API key 設定）
 setup.bat
 ```
 
@@ -88,12 +89,69 @@ setup.bat
 
 無 Key 時自動使用匿名存取（IP 限流），足夠日常開發。要提高限額：
 
+1. **建立並編輯 `.env.local`：**
+   ```bash
+   cp .env.example .env.local
+   nano .env.local  # 編輯，填入你從 https://www.anysearch.com 申請的 API key
+   ```
+
+2. **執行設定指令碼**（自動讀取 `.env.local` 並設定環境變數）：
+   ```bash
+   ./setup.sh       # Linux/macOS
+   # 或
+   setup.bat        # Windows
+   ```
+
+完成！設定指令碼會根據你的平台自動設定環境變數。
+
+---
+
+## 設定檔說明
+
+### 什麼是 `.env.local`？
+
+`.env.local` 檔案儲存你的 AnySearch API 認證資訊。它**永遠不會被提交到 Git**，每位開發者的機器上都是獨立的。
+
+**檔案說明：**
+- `.env.example` — 範本，顯示所有可用的設定選項（此檔案會提交到 Git）
+- `.env.local` — 你的個人設定，包含實際的 API key（此檔案在 `.gitignore` 中，不會提交）
+
+### 設定流程
+
+1. **複製範本：**
+   ```bash
+   cp .env.example .env.local
+   ```
+
+2. **編輯填入 API key：**
+   ```bash
+   nano .env.local  # 將 ANYSEARCH_API_KEY=your_key_here 改為你的實際 key
+   ```
+
+3. **執行設定指令碼：**
+   ```bash
+   ./setup.sh       # 同時處理符號連結及環境變數設定
+   ```
+
+設定指令碼會：
+- 在目前 shell session 中設定 `ANYSEARCH_API_KEY`
+- （在 Linux/macOS）可選是否新增到 `~/.bashrc` 或 `~/.zshrc`
+- （在 Windows）透過 `setx` 設定到使用者環境變數
+
+### 支援的環境變數（在 .env.local 中）
+
 ```bash
-# 加入 ~/.zshrc 或 ~/.bashrc
-export ANYSEARCH_API_KEY=your_key_here
+# 必填：你的 AnySearch API key
+ANYSEARCH_API_KEY=sk_live_your_key_here
+
+# 選項：自訂 API 端點（預設為 https://api.anysearch.com）
+ANYSEARCH_API_ENDPOINT=https://api.anysearch.com
+
+# 選項：Windsurf MCP proxy 連接埠（預設為 8000）
+ANYSEARCH_MCP_PORT=8000
 ```
 
-在 [anysearch.com](https://www.anysearch.com) 申請 Key。
+---
 
 ### 手動 MCP 設定（未使用 setup.sh 時）
 

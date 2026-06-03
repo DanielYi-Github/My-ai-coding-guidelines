@@ -53,5 +53,46 @@ if "%MODE%"=="SYMLINK" (
 )
 
 echo.
+echo =============================================================================
+echo Configuring AnySearch API Key...
+echo =============================================================================
+
+REM Check if .env.local exists, create from template if not
+if not exist ".env.local" (
+    if exist ".env.example" (
+        echo Creating .env.local from template...
+        copy /Y .env.example .env.local >nul
+        echo.
+        echo ^! Please edit .env.local with your API key:
+        echo   notepad .env.local
+        echo.
+        echo Then run this script again.
+        echo.
+        pause
+        exit /b 0
+    )
+)
+
+REM Read .env.local and extract ANYSEARCH_API_KEY using PowerShell
+for /f "tokens=*" %%A in ('powershell -NoProfile -Command "if (Test-Path '.env.local') { $content = Get-Content '.env.local' | Where-Object { $_ -match '^ANYSEARCH_API_KEY=' }; $content -replace 'ANYSEARCH_API_KEY=', '' }"') do (
+    set ANYSEARCH_API_KEY=%%A
+)
+
+if not defined ANYSEARCH_API_KEY (
+    echo.
+    echo Warning: ANYSEARCH_API_KEY not set in .env.local
+    echo Please edit .env.local and fill in your API key, then run setup.bat again.
+    echo.
+    pause
+    exit /b 1
+) else (
+    REM Set environment variable in current session
+    setx ANYSEARCH_API_KEY "%ANYSEARCH_API_KEY%"
+    echo.
+    echo [OK] ANYSEARCH_API_KEY has been set in Windows environment variables
+    echo      You will need to restart your terminal/IDE for changes to take effect
+)
+
+echo.
 echo Done! All AI tools in this project will now use CLAUDE.md as their rule source.
 pause

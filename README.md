@@ -47,7 +47,7 @@ Click **"Use this template"** on GitHub, then clone your new repo. All symlinks 
 # 1. Copy CLAUDE.md to your project root
 curl -o CLAUDE.md https://raw.githubusercontent.com/<your-username>/ai-coding-guidelines/main/CLAUDE.md
 
-# 2. Run the setup script to create all symlinks
+# 2. Run the setup script (handles symlinks + environment setup)
 curl -o setup.sh https://raw.githubusercontent.com/<your-username>/ai-coding-guidelines/main/setup.sh
 chmod +x setup.sh && ./setup.sh
 
@@ -62,6 +62,7 @@ rtk init --agent antigravity   # Google Antigravity
 ```bat
 # Run setup.bat as Administrator for symlink support
 # Or run as normal user — it will copy files instead
+# (The script will also guide you through AnySearch API key setup)
 setup.bat
 ```
 
@@ -88,12 +89,69 @@ This project pre-configures **[AnySearch](https://www.anysearch.com/docs)** as t
 
 Anonymous access works out of the box (IP rate-limited). For higher limits:
 
+1. **Create and edit `.env.local`:**
+   ```bash
+   cp .env.example .env.local
+   nano .env.local  # Edit with your API key from https://www.anysearch.com
+   ```
+
+2. **Run the setup script** (automatically reads `.env.local` and configures environment):
+   ```bash
+   ./setup.sh       # Linux/macOS
+   # or
+   setup.bat        # Windows
+   ```
+
+That's it! The setup script will handle environment variable configuration for your platform.
+
+---
+
+## Configuration Files
+
+### What Is `.env.local`?
+
+The `.env.local` file stores your AnySearch API credentials. It's **never committed to Git** and is unique to each developer's machine.
+
+**Files explained:**
+- `.env.example` — Template showing all available configuration options (this IS committed to Git)
+- `.env.local` — Your personal config with actual API key (this is in `.gitignore`, NOT committed)
+
+### Setup Workflow
+
+1. **Copy the template:**
+   ```bash
+   cp .env.example .env.local
+   ```
+
+2. **Edit with your API key:**
+   ```bash
+   nano .env.local  # Change ANYSEARCH_API_KEY=your_key_here to your actual key
+   ```
+
+3. **Run setup script:**
+   ```bash
+   ./setup.sh       # Handles symlinks + sets environment variable
+   ```
+
+The setup script will:
+- Set `ANYSEARCH_API_KEY` in your current shell session
+- (On Linux/macOS) Optionally add it to your `~/.bashrc` or `~/.zshrc`
+- (On Windows) Set it in your user environment variables via `setx`
+
+### Supported Variables (in .env.local)
+
 ```bash
-# Add to ~/.zshrc or ~/.bashrc
-export ANYSEARCH_API_KEY=your_key_here
+# Required: Your AnySearch API key
+ANYSEARCH_API_KEY=sk_live_your_key_here
+
+# Optional: Custom API endpoint (defaults to https://api.anysearch.com)
+ANYSEARCH_API_ENDPOINT=https://api.anysearch.com
+
+# Optional: Windsurf MCP proxy port (defaults to 8000)
+ANYSEARCH_MCP_PORT=8000
 ```
 
-Get a key at [anysearch.com](https://www.anysearch.com).
+---
 
 ### Manual MCP Setup (if not using setup.sh)
 

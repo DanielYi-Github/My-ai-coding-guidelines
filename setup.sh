@@ -95,13 +95,69 @@ EOF
   fi
 fi
 
+# =============================================================================
+# AnySearch API Key Configuration
+# =============================================================================
+echo ""
+echo "🔑 Configuring AnySearch API Key..."
+
+if [ ! -f ".env.local" ]; then
+  echo "   Creating .env.local from template..."
+  if [ -f ".env.example" ]; then
+    cp .env.example .env.local
+    echo "  ✓ Created .env.local — edit it with your API key from anysearch.com"
+    echo "    nano .env.local  # or use your preferred editor"
+  else
+    echo "  ⚠ .env.example not found, skipping"
+  fi
+else
+  echo "  ✓ .env.local already exists"
+fi
+
+# Read and validate .env.local
+if [ -f ".env.local" ]; then
+  set +e
+  source .env.local 2>/dev/null
+  set -e
+  
+  if [ -n "$ANYSEARCH_API_KEY" ] && [ "$ANYSEARCH_API_KEY" != "your_key_here" ]; then
+    export ANYSEARCH_API_KEY="$ANYSEARCH_API_KEY"
+    echo "  ✓ ANYSEARCH_API_KEY set in current shell session"
+    
+    # Ask to persist to shell profile
+    read -p "   Add ANYSEARCH_API_KEY to shell profile? (y/n) " -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+      PROFILE_FILE=""
+      if [[ "$SHELL" == *"bash"* ]]; then
+        PROFILE_FILE="$HOME/.bashrc"
+      elif [[ "$SHELL" == *"zsh"* ]]; then
+        PROFILE_FILE="$HOME/.zshrc"
+      else
+        PROFILE_FILE="$HOME/.profile"
+      fi
+      
+      if [ -n "$PROFILE_FILE" ]; then
+        if ! grep -q "export ANYSEARCH_API_KEY" "$PROFILE_FILE"; then
+          echo "" >> "$PROFILE_FILE"
+          echo "# AnySearch API Key (auto-configured)" >> "$PROFILE_FILE"
+          echo "export ANYSEARCH_API_KEY='$ANYSEARCH_API_KEY'" >> "$PROFILE_FILE"
+          echo "  ✓ Added ANYSEARCH_API_KEY to $PROFILE_FILE"
+          echo "    Run 'source $PROFILE_FILE' or restart your terminal for changes to take effect"
+        else
+          echo "  ⚠ ANYSEARCH_API_KEY already in $PROFILE_FILE"
+        fi
+      fi
+    fi
+  else
+    echo "  ⚠ ANYSEARCH_API_KEY not set in .env.local (still using placeholder)"
+    echo "    Edit .env.local to set your actual API key: nano .env.local"
+  fi
+fi
+
 echo ""
 echo "✅ Done! All AI tools in this project will now use CLAUDE.md as the single source of truth."
 echo "   AnySearch is pre-configured: AI will automatically use it for all web searches."
-echo ""
-echo "💡 Optional: Set your AnySearch API key for higher rate limits:"
-echo "   export ANYSEARCH_API_KEY=your_key_here   # add to ~/.zshrc or ~/.bashrc"
-echo "   Get a key at: https://www.anysearch.com"
 echo ""
 echo "💡 Optional: Install RTK for 60–90% token savings on shell commands:"
 echo "   brew install rtk         # macOS"
