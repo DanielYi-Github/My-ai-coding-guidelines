@@ -39,7 +39,65 @@
 
 ### 方法 A — 使用此 Repo 作為 Template
 
-在 GitHub 上點選 **「Use this template」**，Clone 你的新 Repo。所有符號連結已預先設定好，不需要任何額外操作。
+**推薦方式** — 一鍵建立，無需手動操作符號連結。
+
+#### Step 1：在 GitHub 上建立新 Repo
+
+1. 進入本 Repo：[DanielYi-GitHub/My-ai-coding-guidelines](https://github.com/DanielYi-GitHub/My-ai-coding-guidelines)
+2. 點選右上方綠色按鈕 **「Use this template」** → **「Create a new repository」**
+3. 填寫新 Repo 資訊：
+   - **Repository name**：自訂名稱（如 `my-project`）
+   - **Description**：選填
+   - **Public / Private**：選擇可見性
+4. 點選 **「Create repository from template」** — 完成！
+
+#### Step 2：Clone 到本地電腦
+
+```bash
+# 用你的 GitHub 帳號和新 Repo 名稱替換
+git clone https://github.com/<your-username>/<your-repo-name>.git
+cd <your-repo-name>
+```
+
+#### Step 3：執行初始化腳本（自動配置所有工具）
+
+**macOS / Linux：**
+```bash
+chmod +x setup.sh && ./setup.sh
+```
+
+**Windows（以系統管理員身份執行）：**
+```bat
+setup.bat
+```
+
+這一步會：
+- ✅ 驗證符號連結是否正確
+- ✅ 建立空的 `.env.local`（AnySearch API Key 設定）
+- ✅ 提示安裝 RTK（Token 優化工具，可選）
+- ✅ 驗證各個 AI 工具的設定檔
+
+#### Step 4（可選但強烈建議）：安裝 RTK 以獲得 Token 節省
+
+RTK 能自動將常用指令的輸出壓縮 60–90%，大幅降低 LLM context 消耗。
+
+```bash
+# macOS
+brew install rtk
+
+# 配置 Claude Code & GitHub Copilot
+rtk init -g
+
+# 配置 Cursor
+rtk init --agent cursor
+
+# 配置 Google Antigravity
+rtk init --agent antigravity
+```
+
+#### 完成！
+
+所有符號連結已預先設定，所有 AI 工具都會自動讀取 `CLAUDE.md` 中的規則。開始編碼吧！
 
 ### 方法 B — 加入現有專案
 

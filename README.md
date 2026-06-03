@@ -39,7 +39,65 @@ Everything lives in `CLAUDE.md`. All other tool-specific files are symlinks poin
 
 ### Option A — Use This Repo as a Template
 
-Click **"Use this template"** on GitHub, then clone your new repo. All symlinks are already in place. Done.
+**Recommended** — One-click repository creation with zero manual symlink setup.
+
+#### Step 1: Create a New Repo on GitHub
+
+1. Visit this repository: [DanielYi-GitHub/My-ai-coding-guidelines](https://github.com/DanielYi-GitHub/My-ai-coding-guidelines)
+2. Click the green **"Use this template"** button → **"Create a new repository"**
+3. Fill in your new repo details:
+   - **Repository name**: Choose your name (e.g., `my-project`)
+   - **Description**: Optional
+   - **Public / Private**: Choose visibility
+4. Click **"Create repository from template"** — done!
+
+#### Step 2: Clone to Your Local Machine
+
+```bash
+# Replace with your GitHub username and repo name
+git clone https://github.com/<your-username>/<your-repo-name>.git
+cd <your-repo-name>
+```
+
+#### Step 3: Run the Initialization Script (Auto-Configure Everything)
+
+**macOS / Linux:**
+```bash
+chmod +x setup.sh && ./setup.sh
+```
+
+**Windows (Run as Administrator):**
+```bat
+setup.bat
+```
+
+This will:
+- ✅ Verify all symlinks are in place
+- ✅ Create `.env.local` for AnySearch API Key setup
+- ✅ Prompt to install RTK (optional but recommended)
+- ✅ Validate all AI tool config files
+
+#### Step 4 (Optional but Highly Recommended): Install RTK for Token Savings
+
+RTK automatically compresses command output by 60–90%, dramatically reducing LLM context usage.
+
+```bash
+# macOS
+brew install rtk
+
+# Configure Claude Code & GitHub Copilot
+rtk init -g
+
+# Configure Cursor
+rtk init --agent cursor
+
+# Configure Google Antigravity
+rtk init --agent antigravity
+```
+
+#### Done!
+
+All symlinks are pre-configured. Every AI tool will automatically read the rules from `CLAUDE.md`. Start coding!
 
 ### Option B — Add to an Existing Project
 
